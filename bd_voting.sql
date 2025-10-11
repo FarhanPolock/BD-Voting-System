@@ -1,0 +1,48 @@
+-- BD Voting System SQL (Demo)
+CREATE DATABASE IF NOT EXISTS bd_voting CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE bd_voting;
+
+CREATE TABLE IF NOT EXISTS admins (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  username VARCHAR(50) UNIQUE NOT NULL,
+  password VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS voters (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  nid VARCHAR(50) UNIQUE NOT NULL,
+  email VARCHAR(120) UNIQUE NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS elections (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  title VARCHAR(200) NOT NULL,
+  start_date DATE NOT NULL,
+  end_date DATE NOT NULL,
+  status ENUM('active','inactive') DEFAULT 'inactive'
+);
+
+CREATE TABLE IF NOT EXISTS candidates (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  election_id INT NOT NULL,
+  name VARCHAR(120) NOT NULL,
+  FOREIGN KEY (election_id) REFERENCES elections(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS votes (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  voter_id INT NOT NULL,
+  election_id INT NOT NULL,
+  candidate_id INT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uniq_vote (voter_id, election_id),
+  FOREIGN KEY (voter_id) REFERENCES voters(id) ON DELETE CASCADE,
+  FOREIGN KEY (election_id) REFERENCES elections(id) ON DELETE CASCADE,
+  FOREIGN KEY (candidate_id) REFERENCES candidates(id) ON DELETE CASCADE
+);
+
+INSERT INTO admins (username, password) VALUES ('admin', '12345')
+  ON DUPLICATE KEY UPDATE password=VALUES(password);
